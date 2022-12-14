@@ -12,7 +12,7 @@
 		<img alt="GitHub pull requests" src="https://img.shields.io/github/issues-pr/LordOfTrident/fembed?color=0088ff"/>
 	</a>
 	<br><br><br>
-	<img width="500px" src="res/thumbnail.png"/>
+	<img width="85%" src="res/thumbnail.png"/>
 </p>
 
 ## Table of contents
