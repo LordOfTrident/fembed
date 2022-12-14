@@ -131,7 +131,7 @@ int main(int p_argc, char **p_argv) {
 
 		gen_str_arr(f);
 	} else {
-		printf(TYPE_COLOR"uint8_t"DEFAULT_COLOR" embed = {\n");
+		printf(TYPE_COLOR"uint8_t"DEFAULT_COLOR" embed[] = {\n");
 
 		gen_byte_arr(f);
 	}
