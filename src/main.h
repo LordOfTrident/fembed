@@ -10,6 +10,7 @@
 /*
  * 0.1.0: First release
  * 0.1.1: Fix missing [] on byte array
+ * 0.1.2: Remove redundant new line escapes in string arrays
  *
  */
 

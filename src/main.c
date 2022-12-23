@@ -72,7 +72,6 @@ void gen_str_arr(FILE *p_file) {
 		case '"':  printf(SPECIAL_COLOR"\\\""LITERAL_COLOR); break;
 		case '\\': printf(SPECIAL_COLOR"\\\\"LITERAL_COLOR); break;
 		case '\n':
-			printf(SPECIAL_COLOR"\\n"LITERAL_COLOR);
 			end_str_line();
 			start_str_line();
 
