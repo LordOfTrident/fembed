@@ -1,6 +1,4 @@
 <h1 align="center">fembed</h1>
-<p align="center">C file embedder</p>
-
 <p align="center">
 	<a href="./LICENSE">
 		<img alt="License" src="https://img.shields.io/badge/license-GPL-blue?color=7aca00"/>
@@ -11,18 +9,17 @@
 	<a href="https://github.com/LordOfTrident/fembed/pulls">
 		<img alt="GitHub pull requests" src="https://img.shields.io/github/issues-pr/LordOfTrident/fembed?color=0088ff"/>
 	</a>
+	<img width="80%" src="res/thumbnail.png"/>
 	<br><br><br>
-	<img width="85%" src="res/thumbnail.png"/>
 </p>
 
+A simple C file embedding program that can embed a file into a byte array or an array of strings
+and output it into a file or nicely print it in colors into the standard output.
+
 ## Table of contents
-* [Introduction](#introduction)
 * [Quickstart](#quickstart)
 * [Bugs](#bugs)
 * [Make](#make)
-
-## Introduction
-A simple C file embedder that can embed into a byte array or an array of strings
 
 ## Quickstart
 ```sh

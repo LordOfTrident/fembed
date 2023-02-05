@@ -1,12 +1,16 @@
 #include "main.h"
 
+#define CARGS_IMPLEMENTATION
+#include "cargs.h"
+
+#define COLORER_IMPLEMENTATION
+#include "colorer.h"
+
 void usage(void) {
-	puts("Github: "GITHUB_LINK"\n"
-	     "Usage: "APP_NAME" [FILE] [OPTIONS]\n"
-	     "Options:\n"
-	     "  -h, --help     Show this message\n"
-	     "  -v, --version  Print the version\n"
-	     "  -s, --string   Embed into a string array");
+	puts("Github: "GITHUB_LINK);
+	puts("Usage: "APP_NAME" [FILE] [OPTIONS]");
+	puts("Options: ");
+	args_print_flags(stdout);
 
 	exit(EXIT_SUCCESS);
 }
@@ -17,127 +21,204 @@ void version(void) {
 	exit(EXIT_SUCCESS);
 }
 
-void error(const char *p_fmt, ...) {
+void error(const char *fmt, ...) {
 	char    msg[256];
 	va_list args;
 
-	va_start(args, p_fmt);
-	vsnprintf(msg, sizeof(msg), p_fmt, args);
+	va_start(args, fmt);
+	vsnprintf(msg, sizeof(msg), fmt, args);
 	va_end(args);
 
 	fprintf(stderr, "Error: %s\n", msg);
 }
 
-void try(const char *p_flag) {
-	fprintf(stderr, "Try '"APP_NAME" %s'\n", p_flag);
+void try(const char *flag) {
+	fprintf(stderr, "Try '"APP_NAME" %s'\n", flag);
 }
 
-void gen_byte_arr(FILE *p_file) {
-	int    byte;
-	size_t i;
-	for (i = 0; (byte = fgetc(p_file)) != EOF; ++ i) {
-		if (i % SPLIT_ON == 0) {
-			if (i > 0)
-				putchar('\n');
-
-			putchar('\t');
+static char *pure_name(const char *path) {
+	for (size_t i = strlen(path) - 1; i != (size_t)-1; -- i) {
+		if (path[i] == '\\' || path[i] == '/') {
+			path += i + 1;
+			break;
 		}
-
-		printf(LITERAL_COLOR"0x%02X"DEFAULT_COLOR", ", byte);
 	}
 
-	putchar('\n');
+	size_t len = strlen(path);
+	char *str  = (char*)malloc(len + 1);
+	if (str == NULL)
+		return NULL;
+
+	strcpy(str, path);
+	for (size_t i = 0; i < len; ++ i) {
+		if (str[i] == '.') {
+			str[i] = '\0';
+			break;
+		} else if ((!isalnum(str[i]) && str[i] != '_') || (isdigit(str[i]) && i == 0))
+			str[i] = '_';
+	}
+
+	return str;
 }
 
-static void start_str_line(void) {
-	printf("\t"LITERAL_COLOR"\"");
-}
+static void embed_str(FILE *file, FILE *out, const char *path, const char *name) {
+	color_fg(out, COMMENT_COLOR);
+	fprintf(out, "/* %s */\n", path);
 
-static void end_str_line(void) {
-	printf("\""DEFAULT_COLOR",\n");
-}
+	color_fg(out, TYPE_COLOR);
+	fprintf(out, "static const char");
+	color_fg(out, NORMAL_COLOR);
+	fprintf(out, " *%s[] = {\n", name);
 
-void gen_str_arr(FILE *p_file) {
-	start_str_line();
+	fprintf(out, "\t");
+	color_fg(out, LITERAL_COLOR);
+	fprintf(out, "\"");
 
 	int ch;
-	for (size_t i = 0; (ch = fgetc(p_file)) != EOF; ++ i) {
-		switch (ch) {
-		case '\t': printf(SPECIAL_COLOR"\\t"LITERAL_COLOR);  break;
-		case '\r': printf(SPECIAL_COLOR"\\r"LITERAL_COLOR);  break;
-		case '\v': printf(SPECIAL_COLOR"\\v"LITERAL_COLOR);  break;
-		case '\f': printf(SPECIAL_COLOR"\\f"LITERAL_COLOR);  break;
-		case '\b': printf(SPECIAL_COLOR"\\b"LITERAL_COLOR);  break;
-		case '\0': printf(SPECIAL_COLOR"\\0"LITERAL_COLOR);  break;
-		case '"':  printf(SPECIAL_COLOR"\\\""LITERAL_COLOR); break;
-		case '\\': printf(SPECIAL_COLOR"\\\\"LITERAL_COLOR); break;
-		case '\n':
-			end_str_line();
-			start_str_line();
+	for (size_t i = 0; (ch = fgetc(file)) != EOF; ++ i) {
+		if (ch >= ' ' && ch <= '~')
+			printf("%c", (char)ch);
+		else {
+			color_fg(out, SPECIAL_COLOR);
+			switch (ch) {
+			case '\t': fprintf(out, "\\t");  break;
+			case '\r': fprintf(out, "\\r");  break;
+			case '\v': fprintf(out, "\\v");  break;
+			case '\f': fprintf(out, "\\f");  break;
+			case '\b': fprintf(out, "\\b");  break;
+			case '\0': fprintf(out, "\\0");  break;
+			case '"':  fprintf(out, "\\\""); break;
+			case '\\': fprintf(out, "\\\\"); break;
+			case '\n':
+				color_fg(out, LITERAL_COLOR);
+				fprintf(out, "\"");
+				color_fg(out, NORMAL_COLOR);
+				fprintf(out, ",\n");
 
-			break;
+				fprintf(out, "\t");
+				color_fg(out, LITERAL_COLOR);
+				fprintf(out, "\"");
+				break;
 
-		default:
-			if (ch >= ' ' && ch <= '~')
-				printf("%c", (char)ch);
-			else
-				printf(SPECIAL_COLOR"\\x%02X"LITERAL_COLOR, ch);
+			default:
+				fprintf(out, "\\x%02X", ch);
 
-			break;
+				break;
+			}
+			color_fg(out, LITERAL_COLOR);
 		}
 	}
 
-	end_str_line();
+	fprintf(out, "\"");
+	color_fg(out, NORMAL_COLOR);
+	fprintf(out, ",\n};\n");
 }
 
-int main(int p_argc, char **p_argv) {
-	const char *path    = NULL;
-	bool        str_arr = false;
+static void embed_bytes(FILE *file, FILE *out, const char *path, const char *name) {
+	color_fg(out, COMMENT_COLOR);
+	fprintf(out, "/* %s */\n", path);
 
-	for (int i = 1; i < p_argc; ++ i) {
-		if (strcmp(p_argv[i], "-h") == 0 || strcmp(p_argv[i], "--help") == 0)
-			usage();
-		else if (strcmp(p_argv[i], "-v") == 0 || strcmp(p_argv[i], "--version") == 0)
-			version();
-		else if (strcmp(p_argv[i], "-s") == 0 || strcmp(p_argv[i], "--string") == 0)
-			str_arr = true;
-		else if (path != NULL) {
-			error("Unexpected argument '%s'", p_argv[i]);
-			try("-h");
+	color_fg(out, TYPE_COLOR);
+	fprintf(out, "static const char");
+	color_fg(out, NORMAL_COLOR);
+	fprintf(out, " *%s[] = {\n", name);
 
-			exit(EXIT_FAILURE);
-		} else
-			path = p_argv[i];
+	int byte;
+	for (size_t i = 0; (byte = fgetc(file)) != EOF; ++ i) {
+		if (i % SPLIT_ON == 0) {
+			if (i > 0)
+				fprintf(out, "\n");
+
+			fprintf(out, "\t");
+		}
+
+		color_fg(out, LITERAL_COLOR);
+		fprintf(out, "0x%02X", byte);
+		color_fg(out, NORMAL_COLOR);
+		fprintf(out, ", ");
 	}
 
-	if (path == NULL) {
-		error("No input file specified");
-		try("-h");
+	fprintf(out, "\n};\n");
+}
 
-		exit(EXIT_FAILURE);
-	}
-
-	FILE *f = fopen(path, "r");
+static void embed(const char *in, const char *out, bool string) {
+	FILE *f = fopen(in, "r");
 	if (f == NULL) {
-		error("Could not open file '%s'", path);
-		try("-h");
-
+		error("Could not open file '%s'", in);
 		exit(EXIT_FAILURE);
 	}
 
-	if (str_arr) {
-		printf(TYPE_COLOR"const char"DEFAULT_COLOR" *embed[] = {\n");
-
-		gen_str_arr(f);
-	} else {
-		printf(TYPE_COLOR"uint8_t"DEFAULT_COLOR" embed[] = {\n");
-
-		gen_byte_arr(f);
+	FILE *o;
+	if (out == NULL)
+		o = stdout;
+	else {
+		o = fopen(out, "w");
+		if (o == NULL) {
+			error("Could not write file '%s'", out);
+			exit(EXIT_FAILURE);
+		}
 	}
 
-	printf("};\n");
+	char *pure = pure_name(in);
+	if (pure == NULL)
+		assert(0 && "malloc() fail");
 
-	fclose(f);
+	if (string)
+		embed_str(f, o, in, pure);
+	else
+		embed_bytes(f, o, in, pure);
 
-	return 0;
+	free(pure);
+}
+
+int main(int argc, const char **argv) {
+	args_t a = new_args(argc, argv);
+	args_shift(&a);
+
+	char *out     = NULL;
+	bool  ver     = false;
+	bool  help    = false;
+	bool  string  = false;
+
+	flag_bool("v", "version", "Show the version",       &ver);
+	flag_bool("h", "help",    "Show the usage",         &help);
+	flag_bool("s", "string",  "Output as string array", &string);
+	flag_cstr("o", "out",     "Path of output file",    &out);
+
+	int    where;
+	args_t stripped;
+	int    err = args_parse_flags(&a, &where, &stripped);
+	if (err != ARG_OK) {
+		switch (err) {
+		case ARG_OUT_OF_MEM:    assert(0 && "malloc() fail");
+		case ARG_UNKNOWN:       error("Unknown flag '%s'",            a.v[where]); try("-h"); break;
+		case ARG_MISSING_VALUE: error("Flag '%s' is a missing value", a.v[where]); try("-h"); break;
+
+		default: error("Incorrect type for flag '%s'", a.v[where]); try("-h");
+		}
+
+		free(stripped.base);
+		exit(EXIT_FAILURE);
+	}
+
+	if (help)
+		usage();
+	else if (ver)
+		version();
+
+	if (stripped.c != 1) {
+		if (stripped.c < 1)
+			error("No input file specified");
+		else
+			error("Unexpected argument '%s'", stripped.v[1]);
+
+		try("-h");
+		exit(EXIT_FAILURE);
+	}
+
+	embed(stripped.v[0], out, string);
+
+	free(out);
+	free(stripped.base);
+	return EXIT_SUCCESS;
 }

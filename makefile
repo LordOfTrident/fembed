@@ -1,10 +1,10 @@
-SRC  = $(wildcard src/*.c)
-DEPS = $(wildcard src/*.h)
-OBJ  = $(addsuffix .o,$(subst src/,bin/,$(basename $(SRC))))
-
 BIN     = ./bin
 OUT     = $(BIN)/app
 INSTALL = /usr/bin/fembed
+
+SRC  = $(wildcard src/*.c)
+DEPS = $(wildcard src/*.h)
+OBJ  = $(addsuffix .o,$(subst src/,$(BIN)/,$(basename $(SRC))))
 
 CC     = gcc
 CSTD   = c11
@@ -20,7 +20,7 @@ bin/%.o: src/%.c $(DEPS)
 	$(CC) -c $< $(CFLAGS) -o $@
 
 $(BIN):
-	mkdir -p bin
+	mkdir -p $(BIN)
 
 install:
 	cp $(OUT) $(INSTALL)
