@@ -1,0 +1,6 @@
+[submodule "cargs"]
+	path = cargs
+	url = https://github.com/LordOfTrident/cargs
+[submodule "colorer"]
+	path = colorer
+	url = https://github.com/LordOfTrident/colorer

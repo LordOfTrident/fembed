@@ -1,10 +1,10 @@
 #include "main.h"
 
 #define CARGS_IMPLEMENTATION
-#include "cargs.h"
+#include "../cargs/cargs.h"
 
 #define COLORER_IMPLEMENTATION
-#include "colorer.h"
+#include "../colorer/colorer.h"
 
 void usage(void) {
 	puts("Github: "GITHUB_LINK);
