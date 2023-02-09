@@ -66,8 +66,9 @@ static void embed_str(FILE *file, FILE *out, const char *path, const char *name)
 	fprintf(out, "/* %s */\n", path);
 
 	color_fg(out, TYPE_COLOR);
+	color_bold(out);
 	fprintf(out, "static const char");
-	color_fg(out, NORMAL_COLOR);
+	color_reset(out);
 	fprintf(out, " *%s[] = {\n", name);
 
 	fprintf(out, "\t");
@@ -80,6 +81,7 @@ static void embed_str(FILE *file, FILE *out, const char *path, const char *name)
 			printf("%c", (char)ch);
 		else {
 			color_fg(out, SPECIAL_COLOR);
+			color_bold(out);
 			switch (ch) {
 			case '\t': fprintf(out, "\\t");  break;
 			case '\r': fprintf(out, "\\r");  break;
@@ -90,9 +92,10 @@ static void embed_str(FILE *file, FILE *out, const char *path, const char *name)
 			case '"':  fprintf(out, "\\\""); break;
 			case '\\': fprintf(out, "\\\\"); break;
 			case '\n':
+				color_reset(out);
 				color_fg(out, LITERAL_COLOR);
 				fprintf(out, "\"");
-				color_fg(out, NORMAL_COLOR);
+				color_reset(out);
 				fprintf(out, ",\n");
 
 				fprintf(out, "\t");
@@ -102,12 +105,13 @@ static void embed_str(FILE *file, FILE *out, const char *path, const char *name)
 
 			default: fprintf(out, "\\x%02X", ch);
 			}
+			color_reset(out);
 			color_fg(out, LITERAL_COLOR);
 		}
 	}
 
 	fprintf(out, "\"");
-	color_fg(out, NORMAL_COLOR);
+	color_reset(out);
 	fprintf(out, ",\n};\n");
 }
 
@@ -116,8 +120,10 @@ static void embed_bytes(FILE *file, FILE *out, const char *path, const char *nam
 	fprintf(out, "/* %s */\n", path);
 
 	color_fg(out, TYPE_COLOR);
+	color_bold(out);
 	fprintf(out, "static const char");
-	color_fg(out, NORMAL_COLOR);
+	color_reset(out);
+	color_reset(out);
 	fprintf(out, " *%s[] = {\n", name);
 
 	int byte;
@@ -131,7 +137,7 @@ static void embed_bytes(FILE *file, FILE *out, const char *path, const char *nam
 
 		color_fg(out, LITERAL_COLOR);
 		fprintf(out, "0x%02X", byte);
-		color_fg(out, NORMAL_COLOR);
+		color_reset(out);
 		fprintf(out, ", ");
 	}
 
