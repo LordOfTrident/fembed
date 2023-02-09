@@ -10,16 +10,8 @@
 #define GITHUB_LINK "https://github.com/LordOfTrident/fembed"
 
 #define VERSION_MAJOR 1
-#define VERSION_MINOR 1
-#define VERSION_PATCH 2
-
-/*
- * 0.1.0: First release
- * 0.1.1: Fix missing [] on byte array
- * 0.1.2: Remove redundant new line escapes in string arrays
- * 1.0.0: Switch to using cargs and colorer libraries, support windows, add an output to file option
- *
- */
+#define VERSION_MINOR 0
+#define VERSION_PATCH 0
 
 #define TYPE_COLOR    COLOR_BRED
 #define LITERAL_COLOR COLOR_BCYAN

@@ -1,6 +1,6 @@
-[submodule "cargs"]
-	path = cargs
+[submodule "lib/cargs"]
+	path = lib/cargs
 	url = https://github.com/LordOfTrident/cargs
-[submodule "colorer"]
-	path = colorer
+[submodule "lib/colorer"]
+	path = lib/colorer
 	url = https://github.com/LordOfTrident/colorer

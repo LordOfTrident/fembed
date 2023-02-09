@@ -1,10 +1,10 @@
 #include "main.h"
 
 #define CARGS_IMPLEMENTATION
-#include "../cargs/cargs.h"
+#include <cargs/cargs.h>
 
 #define COLORER_IMPLEMENTATION
-#include "../colorer/colorer.h"
+#include <colorer/colorer.h>
 
 void usage(void) {
 	puts("Github: "GITHUB_LINK);
@@ -75,7 +75,7 @@ static void embed_str(FILE *file, FILE *out, const char *path, const char *name)
 	fprintf(out, "\"");
 
 	int ch;
-	for (size_t i = 0; (ch = fgetc(file)) != EOF; ++ i) {
+	while (ch = fgetc(file)) != EOF) {
 		if (ch >= ' ' && ch <= '~')
 			printf("%c", (char)ch);
 		else {
@@ -100,10 +100,7 @@ static void embed_str(FILE *file, FILE *out, const char *path, const char *name)
 				fprintf(out, "\"");
 				break;
 
-			default:
-				fprintf(out, "\\x%02X", ch);
-
-				break;
+			default: fprintf(out, "\\x%02X", ch);
 			}
 			color_fg(out, LITERAL_COLOR);
 		}
