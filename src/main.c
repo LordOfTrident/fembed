@@ -75,7 +75,7 @@ static void embed_str(FILE *file, FILE *out, const char *path, const char *name)
 	fprintf(out, "\"");
 
 	int ch;
-	while (ch = fgetc(file)) != EOF) {
+	while ((ch = fgetc(file)) != EOF) {
 		if (ch >= ' ' && ch <= '~')
 			printf("%c", (char)ch);
 		else {
