@@ -16,6 +16,11 @@
 A simple C file embedding program that can embed a file into a byte array or an array of strings
 and output it into a file or nicely print it in colors into the standard output.
 
+Clone this repo with
+```sh
+$ git clone --recurse-submodules https://github.com/LordOfTrident/fembed
+```
+
 ## Table of contents
 * [Quickstart](#quickstart)
 * [Bugs](#bugs)
