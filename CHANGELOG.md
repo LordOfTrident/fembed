@@ -11,3 +11,4 @@
 - `1.0.0`: Switch to using cargs for parsing command line arguments, use the colorer library (color
            support now for Windows and Linux), add an output to file option
 - `1.0.1`: Add bold effects on linux and make text default color, not bright white
+- `1.0.2`: Fix quotes and backslashes not getting escaped
