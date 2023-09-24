@@ -78,7 +78,7 @@ static void embed_str(FILE *file, FILE *out, const char *path, const char *name)
 	int ch;
 	while ((ch = fgetc(file)) != EOF) {
 		if (ch >= ' ' && ch <= '~' && ch != '"' && ch != '\\')
-			printf("%c", (char)ch);
+			fprintf(out, "%c", (char)ch);
 		else {
 			color_fg(out, SPECIAL_COLOR);
 			color_bold(out);
